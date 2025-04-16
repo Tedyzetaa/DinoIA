@@ -39,6 +39,7 @@ function initGame() {
 function updateStats() {
   document.getElementById('statGen').textContent      = generation;
   document.getElementById('statBestEver').textContent = bestEver;
+  window.generation = generation; // <- adicionado
 }
 
 function loop() {
@@ -61,10 +62,8 @@ function step() {
   let alive = 0, currBest = 0, currBrain = null;
 
   players.forEach(p => {
-    // 1) lógica de movimento/jump
     p.update(obstacles, ctxs.game.canvas.width, ctxs.game.canvas.height);
 
-    // 2) colisão AABB com obstáculos
     if (p.alive) {
       obstacles.forEach(o => {
         if (
@@ -78,7 +77,6 @@ function step() {
       });
     }
 
-    // 3) coleta estatísticas
     if (p.alive) alive++;
     if (p.score > currBest) {
       currBest  = p.score;
@@ -86,20 +84,17 @@ function step() {
     }
   });
 
-  // atualiza melhor de todos
   if (currBest > bestEver) {
     bestEver      = currBest;
     bestBrainJson = currBrain.save();
     updateStats();
   }
 
-  // nova geração se todos morrerem
   if (alive === 0) {
     es.nextGeneration(players.map(p => p.score));
     initGame();
   }
 
-  // atualiza UI de texto
   document.getElementById('info').textContent =
     `Geração ${generation} | Vivos: ${alive}/${POPULATION_SIZE}`;
   document.getElementById('statBest').textContent =
@@ -109,35 +104,34 @@ function step() {
 }
 
 function draw() {
-  // limpa tela de jogo
   ctxs.game.clearRect(0, 0, ctxs.game.canvas.width, ctxs.game.canvas.height);
-  obstacles.forEach(o => o.draw(ctxs.game));
   players.forEach(p => p.draw(ctxs.game));
+  obstacles.forEach(o => o.draw(ctxs.game));  
 
-  // desenha a rede neural do melhor jogador atual
   if (players.length) {
     drawNeuralNetwork(ctxs.nn, players[0].brain.getGenes());
   }
 
-  // desenha gráficos de performance
   drawBestGraph(ctxs.graph, es.bestScores);
   drawAvgGraph(ctxs.avg,   es.avgScores);
 }
 
-// — UI Handlers —
 document.getElementById('restartBtn').onclick = () => {
   es        = new EvolutionStrategy();
   bestEver  = 0;
   generation = 0;
   initGame();
 };
+
 document.getElementById('pauseBtn').onclick = () => {
   paused = !paused;
   document.getElementById('pauseBtn').textContent =
     paused ? 'Continuar' : 'Pausar';
 };
+
 document.getElementById('speedSelect').onchange = e =>
   speed = +e.target.value;
+
 document.getElementById('saveBtn').onclick = () => {
   if (bestBrainJson) {
     const blob = new Blob([bestBrainJson], { type: 'application/json' });
@@ -148,6 +142,7 @@ document.getElementById('saveBtn').onclick = () => {
     URL.revokeObjectURL(a.href);
   }
 };
+
 document.getElementById('recordBtn').onclick = async () => {
   if (!mediaRecorder) {
     const stream = document.getElementById('gameCanvas').captureStream(30);
@@ -173,6 +168,5 @@ document.getElementById('recordBtn').onclick = async () => {
   }
 };
 
-// inicialização
 initGame();
 requestAnimationFrame(loop);

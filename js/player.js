@@ -1,50 +1,59 @@
-import { GRAVITY, JUMP_FORCE, PLAYER_SIZE } from './constants.js';
+// js/player.js
+
+import { PLAYER_SIZE, GRAVITY, JUMP_FORCE } from './constants.js';
 
 export default class Player {
-  static nextId = 0;
-
   constructor(color, brain) {
-    this.id = Player.nextId++;
-    this.x = 100;
-    this.y = 300;
+    this.x = 50;
+    this.y = 100;
     this.vy = 0;
     this.color = color;
     this.alive = true;
     this.score = 0;
-    this.rewards = 0;     // contador de recompensas
     this.brain = brain;
   }
 
-  update(obstacles, canvasW, canvasH) {
+  update(obstacles, canvasWidth, canvasHeight) {
     if (!this.alive) return;
 
-    // gravidade e limite no chão (y = 300)
+    // física simples
     this.vy += GRAVITY;
-    this.y  = Math.min(this.y + this.vy, 300);
+    this.y += this.vy;
 
-    // obstáculo mais próximo
-    const nearest = obstacles.find(o => o.x + o.size > this.x);
-    if (nearest) {
-      const input = [
-        (nearest.x - this.x) / canvasW,
-        (this.y - nearest.y) / canvasH,
-        nearest.type === 'air' ? 1 : 0
-      ];
-      const action = this.brain.predict(input);
-
-      // se decidir pular e estiver "no chão" (vy ≈ 0), executa salto + recompensa
-      if (action > 0.5 && Math.abs(this.vy) < 0.001) {
-        this.vy = JUMP_FORCE;
-        this.rewards++;      // incrementa contador de recompensas
-        this.score += 50;    // bônus de 50 pontos no score
-      }
+    // chão
+    if (this.y > canvasHeight - PLAYER_SIZE) {
+      this.y = canvasHeight - PLAYER_SIZE;
+      this.vy = 0;
     }
 
-    // pontuação por tempo vivo
+    // inputs: [y, distância até obstáculo, altura do obstáculo]
+    const nextObstacle = obstacles.find(o => o.x + o.size > this.x);
+    const inputs = [
+      this.y,
+      nextObstacle ? nextObstacle.x - this.x : canvasWidth,
+      nextObstacle ? nextObstacle.size : 0
+    ];
+
+    // decisão da IA
+    const output = this.brain.predict(inputs);
+
+    // força pulo na geração 1 ou se IA quiser pular
+    if (output > 0.5 || window.generation === 1) {
+      this.jump();
+    }
+
+    // pontuação simples
     this.score++;
   }
 
+  jump() {
+    if (this.y >= 390) { // chão fixo (ajuste se necessário)
+      this.vy = -JUMP_FORCE;
+    }
+  }
+
   draw(ctx) {
+    if (!this.alive) return;
     ctx.fillStyle = this.color;
     ctx.fillRect(this.x, this.y, PLAYER_SIZE, PLAYER_SIZE);
   }
