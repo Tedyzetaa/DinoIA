@@ -1,0 +1,22 @@
+canvas { 
+    border: 1px solid #333; 
+    display: block; 
+    margin: 10px auto; 
+    background: #fafafa; 
+  }
+  #controls, #statsPanel { 
+    margin: 10px auto; 
+    width: 840px; 
+    font-family: Arial, sans-serif; 
+  }
+  #controls button, #controls select { 
+    margin-right: 8px; 
+    padding: 4px 8px; 
+  }
+  .canvas-container { 
+    display: flex; 
+    flex-wrap: wrap; 
+    justify-content: center; 
+    gap: 10px; 
+  }
+  
