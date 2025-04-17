@@ -1,44 +1,37 @@
+<!-- index.html -->
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Jogo Neural + ES</title>
+  <title>DinoIA - Jogo de Sobrevivência com Redes Neurais</title>
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
   <div id="controls">
-    <button id="restartBtn">Reiniciar Jogo</button>
+    <button id="restartBtn">Start</button>
     <button id="pauseBtn">Pausar</button>
-    <label>Velocidade:
-      <select id="speedSelect">
-        <option value="1">1x</option>
-        <option value="2">2x</option>
-        <option value="3">3x</option>
-        <option value="4">4x</option>
-        <option value="5">5x</option>
-      </select>
-    </label>
-    <button id="saveBtn">Salvar Melhor Rede</button>
+    <button id="saveBtn">Salvar Melhor</button>
     <button id="recordBtn">Gravar Gameplay</button>
-    <span id="info"></span>
+    <select id="speedSelect">
+      <option value="1">x1</option>
+      <option value="2">x2</option>
+      <option value="5">x5</option>
+      <option value="10">x10</option>
+    </select>
   </div>
-
-  <div id="statsPanel">
-    <strong>Estatísticas:</strong><br />
-    Geração: <span id="statGen">0</span><br />
-    Melhor da Geração: <span id="statBest">0</span><br />
-    Melhor Geral: <span id="statBestEver">0</span><br />
-    Média da Geração: <span id="statAvg">0</span>
-  </div>
-
   <div class="canvas-container">
-    <canvas id="gameCanvas" width="800" height="400"></canvas>
+    <canvas id="gameCanvas" width="840" height="400"></canvas>
     <canvas id="nnCanvas" width="400" height="400"></canvas>
     <canvas id="graphCanvas" width="400" height="200"></canvas>
     <canvas id="avgCanvas" width="400" height="200"></canvas>
   </div>
-
+  <div id="statsPanel">
+    <span id="info"></span>
+    <span>Geração: <span id="statGen">0</span></span>
+    <span>Melhor: <span id="statBest">0</span></span>
+    <span>Média: <span id="statAvg">0</span></span>
+    <span>Melhor de Todos: <span id="statBestEver">0</span></span>
+  </div>
   <script type="module" src="js/main.js"></script>
 </body>
 </html>

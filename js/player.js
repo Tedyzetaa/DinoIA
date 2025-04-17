@@ -1,5 +1,4 @@
 // js/player.js
-
 import { PLAYER_SIZE, GRAVITY, JUMP_FORCE } from './constants.js';
 
 export default class Player {
@@ -16,40 +15,43 @@ export default class Player {
   update(obstacles, canvasWidth, canvasHeight) {
     if (!this.alive) return;
 
-    // física simples
+    // Aplica gravidade
     this.vy += GRAVITY;
     this.y += this.vy;
 
-    // chão
-    if (this.y > canvasHeight - PLAYER_SIZE) {
-      this.y = canvasHeight - PLAYER_SIZE;
+    // Reseta no chão
+    const groundY = canvasHeight - PLAYER_SIZE;
+    if (this.y > groundY) {
+      this.y = groundY;
       this.vy = 0;
     }
 
-    // inputs: [y, distância até obstáculo, altura do obstáculo]
+    // Procura próximo obstáculo
     const nextObstacle = obstacles.find(o => o.x + o.size > this.x);
-    const inputs = [
-      this.y,
-      nextObstacle ? nextObstacle.x - this.x : canvasWidth,
-      nextObstacle ? nextObstacle.size : 0
-    ];
+    if (!nextObstacle) {
+      this.score++;
+      return;
+    }
 
-    // decisão da IA
-    const output = this.brain.predict(inputs);
+    // Calcula distância
+    const distance = nextObstacle.x - this.x;
 
-    // força pulo na geração 1 ou se IA quiser pular
-    if (output > 0.5 || window.generation === 1) {
+    // Threshold de distância
+    const DIST_THRESHOLD = 0.25 * canvasWidth;
+
+    // HACK: sempre pula quando obstáculo estiver próximo, em todas as gerações
+    if (
+      this.y >= groundY &&
+      distance <= DIST_THRESHOLD
+    ) {
       this.jump();
     }
 
-    // pontuação simples
     this.score++;
   }
 
   jump() {
-    if (this.y >= 390) { // chão fixo (ajuste se necessário)
-      this.vy = -JUMP_FORCE;
-    }
+    this.vy = JUMP_FORCE;
   }
 
   draw(ctx) {

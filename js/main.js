@@ -1,12 +1,11 @@
 // js/main.js
-
-import Player             from './player.js';
-import Obstacle           from './obstacle.js';
-import NeuralNetwork      from './neuralNetwork.js';
-import EvolutionStrategy  from './evolutionStrategy.js';
-import { drawNeuralNetwork }  from './drawNN.js';
+import Player from './player.js';
+import Obstacle from './obstacle.js';
+import NeuralNetwork from './neuralNetwork.js';
+import EvolutionStrategy from './evolutionStrategy.js';
+import { drawNeuralNetwork } from './drawNN.js';
 import { drawBestGraph, drawAvgGraph } from './drawGraph.js';
-import { randomColor }    from './utils.js';
+import { randomColor } from './utils.js';
 import {
   POPULATION_SIZE,
   OBSTACLE_SPAWN_RATE,
@@ -14,22 +13,20 @@ import {
 } from './constants.js';
 
 const ctxs = {
-  game : document.getElementById('gameCanvas').getContext('2d'),
-  nn   : document.getElementById('nnCanvas').getContext('2d'),
+  game: document.getElementById('gameCanvas').getContext('2d'),
+  nn: document.getElementById('nnCanvas').getContext('2d'),
   graph: document.getElementById('graphCanvas').getContext('2d'),
-  avg  : document.getElementById('avgCanvas').getContext('2d')
+  avg: document.getElementById('avgCanvas').getContext('2d')
 };
 
-let es            = new EvolutionStrategy();
-let players       = [], obstacles = [];
+let es = new EvolutionStrategy();
+let players = [], obstacles = [];
 let frame = 0, generation = 0, bestEver = 0;
 let bestBrainJson = null, paused = false, speed = 1;
 let mediaRecorder, recorded = [];
 
 function initGame() {
-  players = es.population.map(g =>
-    new Player(randomColor(), new NeuralNetwork(g))
-  );
+  players = es.population.map(g => new Player(randomColor(), new NeuralNetwork(g)));
   obstacles = [];
   frame = 0;
   generation++;
@@ -37,9 +34,9 @@ function initGame() {
 }
 
 function updateStats() {
-  document.getElementById('statGen').textContent      = generation;
+  document.getElementById('statGen').textContent = generation;
   document.getElementById('statBestEver').textContent = bestEver;
-  window.generation = generation; // <- adicionado
+  window.generation = generation;
 }
 
 function loop() {
@@ -54,16 +51,13 @@ function step() {
   if (frame % OBSTACLE_SPAWN_RATE === 0) {
     obstacles.push(new Obstacle(ctxs.game.canvas.width));
   }
-
   const speedM = 1 + Math.floor(frame / 2000) * 0.2;
   obstacles.forEach(o => o.update(speedM));
   obstacles = obstacles.filter(o => o.x + o.size > 0);
 
   let alive = 0, currBest = 0, currBrain = null;
-
   players.forEach(p => {
     p.update(obstacles, ctxs.game.canvas.width, ctxs.game.canvas.height);
-
     if (p.alive) {
       obstacles.forEach(o => {
         if (
@@ -71,21 +65,18 @@ function step() {
           p.x + PLAYER_SIZE > o.x &&
           p.y < o.y + o.size &&
           p.y + PLAYER_SIZE > o.y
-        ) {
-          p.alive = false;
-        }
+        ) p.alive = false;
       });
     }
-
     if (p.alive) alive++;
     if (p.score > currBest) {
-      currBest  = p.score;
+      currBest = p.score;
       currBrain = p.brain;
     }
   });
 
   if (currBest > bestEver) {
-    bestEver      = currBest;
+    bestEver = currBest;
     bestBrainJson = currBrain.save();
     updateStats();
   }
@@ -97,8 +88,7 @@ function step() {
 
   document.getElementById('info').textContent =
     `Geração ${generation} | Vivos: ${alive}/${POPULATION_SIZE}`;
-  document.getElementById('statBest').textContent =
-    currBest;
+  document.getElementById('statBest').textContent = currBest;
   document.getElementById('statAvg').textContent =
     (es.avgScores.slice(-1)[0] || 0).toFixed(1);
 }
@@ -107,36 +97,30 @@ function draw() {
   ctxs.game.clearRect(0, 0, ctxs.game.canvas.width, ctxs.game.canvas.height);
   obstacles.forEach(o => o.draw(ctxs.game));
   players.forEach(p => p.draw(ctxs.game));
-
-  if (players.length) {
-    drawNeuralNetwork(ctxs.nn, players[0].brain.getGenes());
-  }
-
+  if (players.length) drawNeuralNetwork(ctxs.nn, players[0].brain.getGenes());
   drawBestGraph(ctxs.graph, es.bestScores);
-  drawAvgGraph(ctxs.avg,   es.avgScores);
+  drawAvgGraph(ctxs.avg, es.avgScores);
 }
 
 document.getElementById('restartBtn').onclick = () => {
-  es        = new EvolutionStrategy();
-  bestEver  = 0;
+  es = new EvolutionStrategy();
+  bestEver = 0;
   generation = 0;
   initGame();
 };
 
 document.getElementById('pauseBtn').onclick = () => {
   paused = !paused;
-  document.getElementById('pauseBtn').textContent =
-    paused ? 'Continuar' : 'Pausar';
+  document.getElementById('pauseBtn').textContent = paused ? 'Continuar' : 'Pausar';
 };
 
-document.getElementById('speedSelect').onchange = e =>
-  speed = +e.target.value;
+document.getElementById('speedSelect').onchange = e => speed = +e.target.value;
 
 document.getElementById('saveBtn').onclick = () => {
   if (bestBrainJson) {
     const blob = new Blob([bestBrainJson], { type: 'application/json' });
-    const a    = document.createElement('a');
-    a.href     = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
     a.download = `best_brain_gen${generation}.json`;
     a.click();
     URL.revokeObjectURL(a.href);
@@ -147,13 +131,11 @@ document.getElementById('recordBtn').onclick = async () => {
   if (!mediaRecorder) {
     const stream = document.getElementById('gameCanvas').captureStream(30);
     mediaRecorder = new MediaRecorder(stream);
-    mediaRecorder.ondataavailable = e => {
-      if (e.data.size) recorded.push(e.data);
-    };
+    mediaRecorder.ondataavailable = e => { if (e.data.size) recorded.push(e.data); };
     mediaRecorder.onstop = () => {
       const blob = new Blob(recorded, { type: 'video/webm' });
-      const a    = document.createElement('a');
-      a.href     = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
       a.download = `gameplay_gen${generation}.webm`;
       a.click();
       URL.revokeObjectURL(a.href);
