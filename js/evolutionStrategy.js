@@ -21,22 +21,44 @@ export default class EvolutionStrategy {
     };
   }
 
+  _mutate(value) {
+    const mutationRate = 0.2;
+    const mutationStrength = 0.5;
+    if (Math.random() < mutationRate) {
+      return value + (Math.random() - 0.5) * mutationStrength;
+    }
+    return value;
+  }
+
   nextGeneration(fitnesses) {
     const sorted = this.population
       .map((g, i) => ({ genes: g, fitness: fitnesses[i] }))
       .sort((a, b) => b.fitness - a.fitness);
+
     const elites = sorted.slice(0, Math.floor(POPULATION_SIZE * 0.3)).map(e => e.genes);
     const newPop = [...elites];
+
     while (newPop.length < POPULATION_SIZE) {
       const parent = elites[Math.floor(Math.random() * elites.length)];
       const child = JSON.parse(JSON.stringify(parent));
-      child.weights = child.weights.map(layer => layer.map(w => w + (Math.random() - 0.5) * 0.2));
-      child.biases = child.biases.map(layer => layer.map(b => b + (Math.random() - 0.5) * 0.2));
+
+      // Mutate weights
+      child.weights = child.weights.map(layer =>
+        layer.map(w => this._mutate(w))
+      );
+
+      // Mutate biases
+      child.biases = child.biases.map(layer =>
+        layer.map(b => this._mutate(b))
+      );
+
       newPop.push(child);
     }
+
     this.population = newPop;
     this.bestScores.push(sorted[0].fitness);
     this.avgScores.push(fitnesses.reduce((a, b) => a + b, 0) / fitnesses.length);
+
     return sorted[0].genes;
   }
 }

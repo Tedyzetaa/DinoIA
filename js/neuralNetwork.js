@@ -21,7 +21,7 @@ export default class NeuralNetwork {
         h * this.weights[0][(i + 2) % 3] +
         this.biases[0][i]
       )
-    );
+    );  
     const sum = hidden.reduce((acc, val, i) => acc + val * this.weights[1][i], 0) + this.biases[1][0];
     return sigmoid(sum);
   }
