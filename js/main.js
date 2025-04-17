@@ -105,8 +105,8 @@ function step() {
 
 function draw() {
   ctxs.game.clearRect(0, 0, ctxs.game.canvas.width, ctxs.game.canvas.height);
+  obstacles.forEach(o => o.draw(ctxs.game));
   players.forEach(p => p.draw(ctxs.game));
-  obstacles.forEach(o => o.draw(ctxs.game));  
 
   if (players.length) {
     drawNeuralNetwork(ctxs.nn, players[0].brain.getGenes());

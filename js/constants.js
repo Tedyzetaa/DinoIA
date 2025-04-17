@@ -1,4 +1,4 @@
-export const POPULATION_SIZE   = 10;
+export const POPULATION_SIZE   = 100;
 export const GRAVITY           = 0.6;
 export const JUMP_FORCE        = -12;
 export const BASE_OBSTACLE_SPEED = 3;

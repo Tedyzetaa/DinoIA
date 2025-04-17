@@ -5,7 +5,7 @@ import { PLAYER_SIZE, GRAVITY, JUMP_FORCE } from './constants.js';
 export default class Player {
   constructor(color, brain) {
     this.x = 50;
-    this.y = 100;
+    this.y = 0;
     this.vy = 0;
     this.color = color;
     this.alive = true;
