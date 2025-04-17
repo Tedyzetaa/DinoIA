@@ -5,8 +5,10 @@ export default class Obstacle {
   constructor(canvasW) {
     this.x = canvasW + Math.random() * 200;
     this.type = Math.random() > 0.7 ? 'air' : 'ground';
+
     const groundY = 400 - OBSTACLE_SIZE;
-    const airY = 200 - OBSTACLE_SIZE;
+    const airY = 300 - OBSTACLE_SIZE; // obstáculo aéreo mais próximo do chão
+
     this.y = this.type === 'ground' ? groundY : airY;
     this.size = OBSTACLE_SIZE;
   }
